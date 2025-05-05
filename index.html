@@ -1,26 +1,11 @@
 <!DOCTYPE html>
 <html>
-
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Generate and download train flap sequences</title>
-
-  <style>
-    
-  </style>
-
-  
-</head>
-<body>
-  <!DOCTYPE html>
-<html>
   <head>
     <title>ib flap sequence gen</title>
   </head>
   <body>
-    <form name="data" action="/404" onsubmit="return genFile()">
+    <button onclick="connect()">connect</button>
+    <form name="data" action="" onsubmit="return sendForm()">
       <input type="checkbox" id="arr" name="arr" value="arr">
       <label for="arr"> is departure | </label>
       <input type="time" id="time" name="t">
@@ -39,14 +24,16 @@
 </html>
 
   <script>
-    traintypes = ["@", "ICE", "IC", "EC", "IR", "M", "D", "S", "S1", "S21", "S1+S21", "S2", "EN", "ICN", "SE", "RB", "RE", "CNL", "NZ", "AZ", "DZ", "UEx", "EXE", "EX", "-"];
+const serviceuuid = "35599e64-de60-4b35-8a25-25dad1aac092";
 
-info = ["@", "b. Ansage beacht. #1", "5m später", "10m später", "15m später", "20m später", "25m später", "30m später", "40m später", "50m später", "60m später", ">1h später", "unb. versp.", "hält n. überall", "fällt l. aus", "1. Zugteil", "2. Zugteil", "Gleisänderung", "nicht einst.", "b. Ansage beacht. #2", "b. Vorsicht, Zugdurchfahrt", "Wagenreih. b. Ans. beacht.", "RE2 Rh-Haard-Ex", "hält auf Bhf. der DB nur zum Zusteigen", "Zug hält nur zum Ausst.", "d. Zuganz. ist gest.", "alt 1R2 sekt", "alt 2R1 sekt.", "RB33 Rh-Niers/VRR-Dinslaken", "RB33 Rh-Niers", "RB35 d. Weseler/VRR-Dinslaken", "RB37 d. Wedauer", "zusätzlicher Zug", "RE1 NRW-Ex/VRR - D-Benrath", "RE5 Rh-Ex/VRR - D-Benrath", "RB35 d. Weseler/VRR", "RE5 Rh-Ex/VRR", "RE1 NRW-Ex/VRR", "RE6 Westf-Ex", "Wintersport-Sonderzug", "Touristik-Sonderzug", "Gesellsch.-Sonderzug", "Fußball-Sonderzug", "Schlaf+Liegew.-Zug", "BFS Bürgerb. Sonderzug", "Kurswagen s. Wagenstd.-Anz.", "Reservierungspfl.", "Messe-Schnellzug/nur 1.Kl", "neu 1R2 sekt.", "neu 2R1 sekt.", "vors./Zug w. rangiert", "UEx", "alt 2R1-2R1 sekt.", "alt 1R2-1R2 sekt.", "Airport", "RE1 NRW-Ex/VRR-Kamen", "RE1 NRW-Ex/VRR-Langenf.", "RE3 Rh-Emsch-Ex/VRR-Kamen", "RE3 Rh-Emsch-Ex", "RE5 Rh-Ex/VRR-Dinslaken", "RE5 Rh-Ex/VRR-Langenf.", "RE11 Rh-Hellweg-Ex/VRR-Kamen", "RE11 Rh-Hellweg-Ex", "RB31 Niederrh/VRR-Moers"];
+const traintypes = ["@", "ICE", "IC", "EC", "IR", "M", "D", "S", "S1", "S21", "S1+S21", "S2", "EN", "ICN", "SE", "RB", "RE", "CNL", "NZ", "AZ", "DZ", "UEx", "EXE", "EX", "-"];
 
-smallcharset = '@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ-.,()?!*:/|"=+_ ÀÈÌÒÙÁÉÍÓ';
-bigcharset = "@ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ-.'()?!*:/;<”„,=+ ÀÈ1234567890ÌÒÙÁ";
+const info = ["@", "b. Ansage beacht. #1", "5m später", "10m später", "15m später", "20m später", "25m später", "30m später", "40m später", "50m später", "60m später", ">1h später", "unb. versp.", "hält n. überall", "fällt l. aus", "1. Zugteil", "2. Zugteil", "Gleisänderung", "nicht einst.", "b. Ansage beacht. #2", "b. Vorsicht, Zugdurchfahrt", "Wagenreih. b. Ans. beacht.", "RE2 Rh-Haard-Ex", "hält auf Bhf. der DB nur zum Zusteigen", "Zug hält nur zum Ausst.", "d. Zuganz. ist gest.", "alt 1R2 sekt", "alt 2R1 sekt.", "RB33 Rh-Niers/VRR-Dinslaken", "RB33 Rh-Niers", "RB35 d. Weseler/VRR-Dinslaken", "RB37 d. Wedauer", "zusätzlicher Zug", "RE1 NRW-Ex/VRR - D-Benrath", "RE5 Rh-Ex/VRR - D-Benrath", "RB35 d. Weseler/VRR", "RE5 Rh-Ex/VRR", "RE1 NRW-Ex/VRR", "RE6 Westf-Ex", "Wintersport-Sonderzug", "Touristik-Sonderzug", "Gesellsch.-Sonderzug", "Fußball-Sonderzug", "Schlaf+Liegew.-Zug", "BFS Bürgerb. Sonderzug", "Kurswagen s. Wagenstd.-Anz.", "Reservierungspfl.", "Messe-Schnellzug/nur 1.Kl", "neu 1R2 sekt.", "neu 2R1 sekt.", "vors./Zug w. rangiert", "UEx", "alt 2R1-2R1 sekt.", "alt 1R2-1R2 sekt.", "Airport", "RE1 NRW-Ex/VRR-Kamen", "RE1 NRW-Ex/VRR-Langenf.", "RE3 Rh-Emsch-Ex/VRR-Kamen", "RE3 Rh-Emsch-Ex", "RE5 Rh-Ex/VRR-Dinslaken", "RE5 Rh-Ex/VRR-Langenf.", "RE11 Rh-Hellweg-Ex/VRR-Kamen", "RE11 Rh-Hellweg-Ex", "RB31 Niederrh/VRR-Moers"];
 
-typedropdown = document.getElementById("type");
+const smallcharset = '@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ-.,()?!*:/|"=+_ ÀÈÌÒÙÁÉÍÓ';
+const bigcharset = "@ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ-.'()?!*:/;<”„,=+ ÀÈ1234567890ÌÒÙÁ";
+
+let typedropdown = document.getElementById("type");
 for (let i = 0; i < traintypes.length; i++) {
 	o = document.createElement("option");
   o.innerText = traintypes[i];
@@ -54,7 +41,7 @@ for (let i = 0; i < traintypes.length; i++) {
 	typedropdown.appendChild(o);
 }
 
-infodropdown = document.getElementById("info");
+let infodropdown = document.getElementById("info");
 for (let i = 0; i < info.length; i++) {
 	o = document.createElement("option");
   o.innerText = info[i];
@@ -62,6 +49,7 @@ for (let i = 0; i < info.length; i++) {
 	infodropdown.appendChild(o);
 }
 
+let flap_positions = null;
 
 function convText(text, charset, targetLength) {
 	t = text.toUpperCase();
@@ -76,28 +64,37 @@ function convText(text, charset, targetLength) {
   return result;
 }
 
-function downloadBinary(array, filename = "output.bin") {
-  // Create a Uint8Array from the input array
-  const byteArray = new Uint8Array(array);
-
-  // Create a Blob from the byte array
-  const blob = new Blob([byteArray], { type: "application/octet-stream" });
-
-  // Create a temporary download link
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-
-  // Trigger the download
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+function onDisconnected(event) {
+  alert("connection lost");
 }
 
+function connect() {
+  navigator.bluetooth.requestDevice({
+    filters: [{
+      services: [serviceuuid]
+    }]
+  })
+  .then(device => {
+    device.addEventListener("gattserverdisconnected", onDisconnected);
+    return device.gatt.connect();
+  })
+  .then(server => {
+    return server.getPrimaryService(serviceuuid);
+  })
+  .then(service => {
+    return service.getCharacteristic("flap_positions");
+  })
+  .then(characteristic => {
+    flap_positions = characteristic;
+  });
+}
 
-function genFile() {
+function send(array) {
+  const byteArray = new Uint8Array(array);  
+  flap_positions.writeValue(byteArray);
+}
+
+function sendForm() {
 	f = document.forms["data"];
   
   let t = f["time"].value.split(":");
@@ -118,7 +115,7 @@ function genFile() {
   let botsmall = convText(f["botsmall"].value, smallcharset, 18);
   let botbig = convText(f["botbig"].value, bigcharset, 17);
 
-	let sequence = [255, ...botsmall, ...topsmall, ...botbig];
+	let sequence = [...botsmall, ...topsmall, ...botbig];
   sequence.push(info);
   sequence = [...sequence, ...topbig];
   sequence.push(traintype);
@@ -126,7 +123,7 @@ function genFile() {
   sequence.push(hour);
   
   console.log(topbig);
-  downloadBinary(sequence);
+  send(sequence);
 
 	return false;
 }
