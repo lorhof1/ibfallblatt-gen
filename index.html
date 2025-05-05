@@ -25,6 +25,7 @@
 
   <script>
 const serviceuuid = "35599e64-de60-4b35-8a25-25dad1aac092";
+const characteristicuuid = "64837ee7-fbef-4c8c-bf95-7b5896215ff9";
 
 const traintypes = ["@", "ICE", "IC", "EC", "IR", "M", "D", "S", "S1", "S21", "S1+S21", "S2", "EN", "ICN", "SE", "RB", "RE", "CNL", "NZ", "AZ", "DZ", "UEx", "EXE", "EX", "-"];
 
@@ -82,7 +83,7 @@ function connect() {
     return server.getPrimaryService(serviceuuid);
   })
   .then(service => {
-    return service.getCharacteristic("flap_positions");
+    return service.getCharacteristic(characteristicuuid);
   })
   .then(characteristic => {
     flap_positions = characteristic;
