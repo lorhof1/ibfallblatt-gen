@@ -1,0 +1,24 @@
+female conn w/ notch to the right layout:
+C_
+cg
+xg
+dd
+dd
+_d
+__
+s_
+
+legend: C = inverse clock, c = clock, x = extra, d = data, g = ground, _ = unknown (some sort of feedback), s = not connected, can be repurposed, e.g. as a power rail for the esp32
+logic voltage is 5V, but 3.3V is enough
+
+same layout, esp32 connection scheme (connect d's to 15-19, leave _'s unconnected):
+VIN only works if the corresponding pin is wired to the 5V regulator output on the adjacent module control board
+
+12  _
+13  GND
+14  GND
+d   d
+d   d
+_   d
+_   _
+VIN _
