@@ -7,7 +7,7 @@
     <button onclick="connect()">connect</button>
     <form name="data" action="" onsubmit="return sendForm()">
       <input type="checkbox" id="arr" name="arr" value="arr">
-      <label for="arr"> is departure | </label>
+      <label for="arr"> is arrival | </label>
       <input type="time" id="time" name="t">
       <select id="type" name="type"></select>
       <input type="text" id="topbig" name="topbig" maxlength=5 size=5>
@@ -16,7 +16,7 @@
       <input type="text" id="topsmall" name="topsmall" maxlength=18 size=18>
       <input type="text" id="botsmall" name="botsmall" maxlength=18 size=18>
       <br>
-      <input type="text" id"botbig" name="botbig" maxlength=17 size=17>
+      <input type="text" id="botbig" name="botbig" maxlength=17 size=17>
       <br>
       <input type="submit" value="send">
     </form>
@@ -29,9 +29,9 @@ const characteristicuuid = "64837ee7-fbef-4c8c-bf95-7b5896215ff9";
 
 const traintypes = ["@", "ICE", "IC", "EC", "IR", "M", "D", "S", "S1", "S21", "S1+S21", "S2", "EN", "ICN", "SE", "RB", "RE", "CNL", "NZ", "AZ", "DZ", "UEx", "EXE", "EX", "-"];
 
-const info = ["@", "b. Ansage beacht. #1", "5m später", "10m später", "15m später", "20m später", "25m später", "30m später", "40m später", "50m später", "60m später", ">1h später", "unb. versp.", "hält n. überall", "fällt l. aus", "1. Zugteil", "2. Zugteil", "Gleisänderung", "nicht einst.", "b. Ansage beacht. #2", "b. Vorsicht, Zugdurchfahrt", "Wagenreih. b. Ans. beacht.", "RE2 Rh-Haard-Ex", "hält auf Bhf. der DB nur zum Zusteigen", "Zug hält nur zum Ausst.", "d. Zuganz. ist gest.", "alt 1R2 sekt", "alt 2R1 sekt.", "RB33 Rh-Niers/VRR-Dinslaken", "RB33 Rh-Niers", "RB35 d. Weseler/VRR-Dinslaken", "RB37 d. Wedauer", "zusätzlicher Zug", "RE1 NRW-Ex/VRR - D-Benrath", "RE5 Rh-Ex/VRR - D-Benrath", "RB35 d. Weseler/VRR", "RE5 Rh-Ex/VRR", "RE1 NRW-Ex/VRR", "RE6 Westf-Ex", "Wintersport-Sonderzug", "Touristik-Sonderzug", "Gesellsch.-Sonderzug", "Fußball-Sonderzug", "Schlaf+Liegew.-Zug", "BFS Bürgerb. Sonderzug", "Kurswagen s. Wagenstd.-Anz.", "Reservierungspfl.", "Messe-Schnellzug/nur 1.Kl", "neu 1R2 sekt.", "neu 2R1 sekt.", "vors./Zug w. rangiert", "UEx", "alt 2R1-2R1 sekt.", "alt 1R2-1R2 sekt.", "Airport", "RE1 NRW-Ex/VRR-Kamen", "RE1 NRW-Ex/VRR-Langenf.", "RE3 Rh-Emsch-Ex/VRR-Kamen", "RE3 Rh-Emsch-Ex", "RE5 Rh-Ex/VRR-Dinslaken", "RE5 Rh-Ex/VRR-Langenf.", "RE11 Rh-Hellweg-Ex/VRR-Kamen", "RE11 Rh-Hellweg-Ex", "RB31 Niederrh/VRR-Moers"];
+const infos = ["@", "b. Ansage beacht. #1", "5m später", "10m später", "15m später", "20m später", "25m später", "30m später", "40m später", "50m später", "60m später", ">1h später", "unb. versp.", "hält n. überall", "fällt l. aus", "1. Zugteil", "2. Zugteil", "Gleisänderung", "nicht einst.", "b. Ansage beacht. #2", "b. Vorsicht, Zugdurchfahrt", "Wagenreih. b. Ans. beacht.", "RE2 Rh-Haard-Ex", "hält auf Bhf. der DB nur zum Zusteigen", "Zug hält nur zum Ausst.", "d. Zuganz. ist gest.", "alt 1R2 sekt", "alt 2R1 sekt.", "RB33 Rh-Niers/VRR-Dinslaken", "RB33 Rh-Niers", "RB35 d. Weseler/VRR-Dinslaken", "RB37 d. Wedauer", "zusätzlicher Zug", "RE1 NRW-Ex/VRR - D-Benrath", "RE5 Rh-Ex/VRR - D-Benrath", "RB35 d. Weseler/VRR", "RE5 Rh-Ex/VRR", "RE1 NRW-Ex/VRR", "RE6 Westf-Ex", "Wintersport-Sonderzug", "Touristik-Sonderzug", "Gesellsch.-Sonderzug", "Fußball-Sonderzug", "Schlaf+Liegew.-Zug", "BFS Bürgerb. Sonderzug", "Kurswagen s. Wagenstd.-Anz.", "Reservierungspfl.", "Messe-Schnellzug/nur 1.Kl", "neu 1R2 sekt.", "neu 2R1 sekt.", "vors./Zug w. rangiert", "UEx", "alt 2R1-2R1 sekt.", "alt 1R2-1R2 sekt.", "Airport", "RE1 NRW-Ex/VRR-Kamen", "RE1 NRW-Ex/VRR-Langenf.", "RE3 Rh-Emsch-Ex/VRR-Kamen", "RE3 Rh-Emsch-Ex", "RE5 Rh-Ex/VRR-Dinslaken", "RE5 Rh-Ex/VRR-Langenf.", "RE11 Rh-Hellweg-Ex/VRR-Kamen", "RE11 Rh-Hellweg-Ex", "RB31 Niederrh/VRR-Moers"];
 
-const smallcharset = '@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ-.,()?!*:/|"=+_ ÀÈÌÒÙÁÉÍÓ';
+const smallcharset = '@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ-.,()?!*:/|”=+_ ÀÈÌÒÙÁÉÍÓ';
 const bigcharset = "@ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ-.'()?!*:/;<”„,=+ ÀÈ1234567890ÌÒÙÁ";
 
 let typedropdown = document.getElementById("type");
@@ -43,9 +43,9 @@ for (let i = 0; i < traintypes.length; i++) {
 }
 
 let infodropdown = document.getElementById("info");
-for (let i = 0; i < info.length; i++) {
+for (let i = 0; i < infos.length; i++) {
 	o = document.createElement("option");
-  o.innerText = info[i];
+  o.innerText = infos[i];
   o.value = i;
 	infodropdown.appendChild(o);
 }
@@ -53,15 +53,15 @@ for (let i = 0; i < info.length; i++) {
 let flap_positions = null;
 
 function convText(text, charset, targetLength) {
-	t = text.toUpperCase();
+	let t = text.toUpperCase();
+	t = t.replaceAll('"', '”');
   t = t.padEnd(targetLength, " ");
   
   result = [];
   for (let i = 0; i < t.length; i++) {
-  	result.push(charset.indexOf(t[i]));
+  	  result.push(charset.indexOf(t[i]));
   }
   
-  result.reverse();
   return result;
 }
 
@@ -95,38 +95,74 @@ function send(array) {
   flap_positions.writeValue(byteArray);
 }
 
+const ibflap = {
+  hour: -1, // -1 = blank, 0-24
+  minute: -1, // -1 = blank, 0-60
+  arrival: false, // time is arrival or departure time
+  traintype: "@", // see list
+  info: 0, // set by index
+  trainnum: "", // can be text, 5 chars
+  texta: "", // 18 chars
+  textb: "", // 18 chars
+  textc: "", // 17 chars
+  
+  // flap indices
+  linea: new Array(8).fill(0),
+  linfo: 0,
+  lineb: new Array(18).fill(0),
+  linec: new Array(18).fill(0),
+  lined: new Array(17).fill(0),
+  
+  updatePositions: function() {
+    this.linea = [
+      this.hour + 1 + 27 * this.arrival,
+      this.minute + 1,
+      traintypes.indexOf(this.traintype),
+      ...convText(this.trainnum, bigcharset, 5)
+    ];
+    
+    this.linfo = this.info
+    
+    this.lineb = convText(this.texta, smallcharset, 18);
+    this.linec = convText(this.textb, smallcharset, 18);
+    this.lined = convText(this.textc, bigcharset, 17);
+  },
+  
+  getSequence: function() {
+    return [...this.linea, this.linfo, ...this.lined, ...this.lineb, ...this.linec].reverse();
+  }
+};
+
 function sendForm() {
-	f = document.forms["data"];
+	let f = document.forms["data"];
+	let flap = Object.create(ibflap);
   
   let t = f["time"].value.split(":");
-  hour = Number(t[0]) + 1;
-  minute = Number(t[1]) + 1;
   
-  if(f["arr"].checked) {
-  	hour += 27;
-  }
+  flap.hour = Number(t[0]);
+  flap.minute = Number(t[1]);
   
-  let traintype = Number(f["type"].value);
+  flap.arrival = f["arr"].checked;
   
-  let topbig = convText(f["topbig"].value, bigcharset, 5);
+  flap.trainnum = f["topbig"].value;
 
-  let info = Number(f["info"].value);
+  flap.info = Number(f["info"].value);
 
-  let topsmall = convText(f["topsmall"].value, smallcharset, 18);
-  let botsmall = convText(f["botsmall"].value, smallcharset, 18);
-  let botbig = convText(f["botbig"].value, bigcharset, 17);
+  flap.texta = f["topsmall"].value;
+  flap.textb = f["botsmall"].value;
+  flap.textc = f["botbig"].value;
 
-	let sequence = [...botsmall, ...topsmall, ...botbig];
-  sequence.push(info);
-  sequence = [...sequence, ...topbig];
-  sequence.push(traintype);
-  sequence.push(minute);
-  sequence.push(hour);
+  flap.updatePositions();
+
+  flap.linea[3] = Number(f["type"].value);
   
-  console.log(topbig);
-  send(sequence);
+  send(flap.getSequence());
 
 	return false;
+}
+
+async function sendNextDeparture(station) {
+  let departure = await (await fetch("https://transport.opendata.ch/v1/stationboard?limit=1&station=" + station)).json()
 }
   </script>
 </body>
