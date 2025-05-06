@@ -161,8 +161,129 @@ function sendForm() {
 	return false;
 }
 
+// auxillary functions for sendNextDeparture (selection of two en-route stops). bit of a mess but don't wanna write it myself. also if there is only one currently it's written to text a, while text d would be preferable (bigger characters)
+function hasFrenchAccents(str) {
+  // Common French accented characters
+  return /[àâäæçéèêëîïôœùûüÿ]/i.test(str);
+}
+
+function pickThreeStrings(strings, maxLengths) {
+  const [maxLenFirst, maxLenSecond, maxLenThird] = maxLengths;
+  const n = strings.length;
+  const middleIndex = Math.floor(n / 2);
+
+  // --- Find first string ---
+  let firstIndex = -1;
+  for (let i = 0; i < n; i++) {
+    const s = strings[i];
+    if (s.length <= maxLenFirst && !hasFrenchAccents(s)) {
+      firstIndex = i;
+      break;
+    }
+  }
+
+  if (firstIndex === -1) return ["", "", ""];
+
+  // --- Find second string (after first) ---
+  const secondCandidates = [];
+  for (let i = firstIndex + 1; i < n; i++) {
+    const s = strings[i];
+    if (s.length <= maxLenSecond && !hasFrenchAccents(s)) {
+      secondCandidates.push({ index: i, value: s });
+    }
+  }
+
+  if (secondCandidates.length === 0) return [strings[firstIndex], "", ""];
+
+  const second = secondCandidates.reduce((best, current) => {
+    return Math.abs(current.index - middleIndex) < Math.abs(best.index - middleIndex) ? current : best;
+  });
+
+  // --- Find third string (after second) ---
+  const thirdCandidates = [];
+  for (let i = second.index + 1; i < n; i++) {
+    const s = strings[i];
+    if (s.length <= maxLenThird && !hasFrenchAccents(s)) {
+      thirdCandidates.push({ index: i, value: s });
+    }
+  }
+
+  if (thirdCandidates.length === 0) return [strings[firstIndex], second.value, ""];
+
+  const third = thirdCandidates.reduce((best, current) => {
+    return current.index > best.index ? current : best;
+  });
+
+  return [strings[firstIndex], second.value, third.value];
+}
+
 async function sendNextDeparture(station) {
-  let departure = await (await fetch("https://transport.opendata.ch/v1/stationboard?limit=1&station=" + station)).json()
+  let departure = await fetch("https://transport.opendata.ch/v1/stationboard?limit=1&station=" + station);
+  departure = await departure.json();
+  departure = departure.stationboard[0];
+
+  
+  let flap = Object.create(ibflap);
+  
+  let time = new Date(departure.stop.departure);
+  
+  flap.hour = time.getHours();
+  flap.minute = time.getMinutes();
+  
+  let equivalents = {
+  	R: "RB",
+  	ARZ: "AZ",
+  	EXT: "EX"
+  };
+  
+  let type = departure.category.replace(/\d/g, "");
+  let number = departure.number.replace(/\D/g, "");
+  
+  if (equivalents.hasOwnProperty(type)) {
+  	type = equivalents[type];
+  }
+  
+  if (traintypes.includes(type)) {
+  	flap.traintype = type;
+  	flap.trainnum = number;
+  }
+  else {
+  	if ((type + number).length <= 5) {
+  	  flap.trainnum = type + number;
+  	}
+  	else if (type.length <= 5) {
+  	  flap.trainnum = type;
+  	}
+  }
+
+  if (departure.stop.delay) {
+    let delay = departure.stop.delay;
+    if (delay > 2) flap.info = 2;
+    if (delay > 7) flap.info = 3;
+    if (delay > 12) flap.info = 4;
+    if (delay > 17) flap.info = 5;
+    if (delay > 22) flap.info = 6;
+    if (delay > 27) flap.info = 7;
+    if (delay > 34) flap.info = 8;
+    if (delay > 44) flap.info = 9;
+    if (delay > 54) flap.info = 10;
+    if (delay > 64) flap.info = 11;
+  }
+  
+  let stops = [];
+  for (let i = 0; i < departure.passList.length; i++) {
+    let name = departure.passList[i].location.name;
+    if (name) {
+      stops.push(name);
+    }
+  }
+  
+  [flap.texta, flap.textb, flap.textc] = pickThreeStrings(stops, [18, 18, 17]);
+  
+  flap.updatePositions();
+  send(flap.getSequence());
+    
+  return time; // for refresh once departed
 }
   </script>
 </body>
