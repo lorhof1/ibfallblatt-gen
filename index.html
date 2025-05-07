@@ -26,7 +26,7 @@
     <p>fetch from train station</p>
     Name: <input id="station">
     <button onclick="clearThenDeparture()">start</button>
-    <button onclick="clearTimeout(autofetchTimeout)">stop</button>
+    <button onclick="clearTimeout(autoDepartureTimeout)">stop</button>
   </body>
 </html>
 
@@ -58,7 +58,7 @@ for (let i = 0; i < infos.length; i++) {
 }
 
 let flap_positions = null;
-let autofetchTimeout = null;
+let autoDepartureTimeout = null;
 
 function convText(text, charset, targetLength) {
 	let t = text.toUpperCase();
@@ -137,40 +137,47 @@ const ibflap = {
   },
   
   getSequence: function() {
-    return [...this.linea, this.linfo, ...this.lined, ...this.lineb, ...this.linec].reverse();
+    return [
+      ...this.linea, 
+      this.linfo,
+      ...this.lined,
+      ...this.lineb,
+      ...this.linec
+    ].reverse();
   }
 };
 
 function sendForm() {
-	let f = document.forms["data"];
-	let flap = Object.create(ibflap);
-  
-  let t = f["time"].value.split(":");
-  
-  flap.hour = Number(t[0]);
-  flap.minute = Number(t[1]);
-  
-  flap.arrival = f["arr"].checked;
-  
-  flap.trainnum = f["topbig"].value;
+  try {
+	  let f = document.forms["data"];
+	  let flap = Object.create(ibflap);
+    
+    let t = f["time"].value.split(":");
+    
+    flap.hour = Number(t[0]);
+    flap.minute = Number(t[1]);
+    
+    flap.arrival = f["arr"].checked;
+    
+    flap.trainnum = f["topbig"].value;
 
-  flap.info = Number(f["info"].value);
+    flap.info = Number(f["info"].value);
 
-  flap.texta = f["topsmall"].value;
-  flap.textb = f["botsmall"].value;
-  flap.textc = f["botbig"].value;
+    flap.texta = f["topsmall"].value;
+    flap.textb = f["botsmall"].value;
+    flap.textc = f["botbig"].value;
 
-  flap.updatePositions();
+    flap.updatePositions();
 
-  flap.linea[2] = Number(f["type"].value);
+    flap.linea[2] = Number(f["type"].value);
+    
+    send(flap.getSequence());
+  }
   
-  send(flap.getSequence());
-
-	return false;
+  finally	{ return false; }
 }
 
-function hasFrenchAccents(str) {
-  // Common French accented characters
+function hasFrenchAccents(str) { // no flaps for these :(
   return /[àâäæçéèêëîïôœùûüÿ]/i.test(str);
 }
 
@@ -180,63 +187,68 @@ function pickThreeStrings(strings, maxLengths) {
   const n = strings.length;
   const middleIndex = Math.floor(n / 2);
 
-  // --- Find first string ---
-  let firstIndex = -1;
-  for (let i = 0; i < n; i++) {
+  // --- Find third string (latest valid one) ---
+  let third = null;
+  for (let i = n - 1; i >= 0; i--) {
     const s = strings[i];
-    if (s.length <= maxLenFirst && !hasFrenchAccents(s)) {
-      firstIndex = i;
+    if (s.length <= maxLenThird && !hasFrenchAccents(s)) {
+      third = { index: i, value: s };
       break;
     }
   }
 
-  if (firstIndex === -1) return ["", "", ""];
+  if (!third) return ["", "", ""];
 
-  // --- Find second string (after first) ---
-  const secondCandidates = [];
-  for (let i = firstIndex + 1; i < n; i++) {
+  // --- Find first string (before third) ---
+  let first = null;
+  for (let i = 0; i < third.index; i++) {
+    const s = strings[i];
+    if (s.length <= maxLenFirst && !hasFrenchAccents(s)) {
+      first = { index: i, value: s };
+      break;
+    }
+  }
+
+  if (!first) return ["", "", third.value];
+
+  // --- Find second string (between first and third) ---
+  let secondCandidates = [];
+  for (let i = first.index + 1; i < third.index; i++) {
     const s = strings[i];
     if (s.length <= maxLenSecond && !hasFrenchAccents(s)) {
       secondCandidates.push({ index: i, value: s });
     }
   }
 
-  if (secondCandidates.length === 0) return [strings[firstIndex], "", ""];
-
-  const second = secondCandidates.reduce((best, current) => {
-    return Math.abs(current.index - middleIndex) < Math.abs(best.index - middleIndex) ? current : best;
-  });
-
-  // --- Find third string (after second) ---
-  const thirdCandidates = [];
-  for (let i = second.index + 1; i < n; i++) {
-    const s = strings[i];
-    if (s.length <= maxLenThird && !hasFrenchAccents(s)) {
-      thirdCandidates.push({ index: i, value: s });
-    }
+  let second = "";
+  if (secondCandidates.length > 0) {
+    second = secondCandidates.reduce((best, current) => {
+      return Math.abs(current.index - middleIndex) < Math.abs(best.index - middleIndex) ? current : best;
+    }).value;
   }
 
-  if (thirdCandidates.length === 0) return [strings[firstIndex], second.value, ""];
-
-  const third = thirdCandidates.reduce((best, current) => {
-    return current.index > best.index ? current : best;
-  });
-
-  return [strings[firstIndex], second.value, third.value];
+  return [first.value, second, third.value];
 }
+
 
 async function sendNextDeparture(station) {
   let departure = await fetch("https://transport.opendata.ch/v1/stationboard?limit=1&station=" + station);
   departure = await departure.json();
   departure = departure.stationboard[0];
 
+  let time = new Date(departure.stop.departure);
+  
+  // do not display departed/departing train
+  if (time.getMinutes() <= new Date().getMinutes()) {
+    clearThenDeparture();
+    return;
+  }
   
   let flap = Object.create(ibflap);
   
-  let time = new Date(departure.stop.departure);
-  
   flap.hour = time.getHours();
   flap.minute = time.getMinutes();
+  
   
   let equivalents = {
   	R: "RB",
@@ -244,6 +256,7 @@ async function sendNextDeparture(station) {
   	EXT: "EX"
   };
   
+  // remove numbers from type and letters from numbers (lausanne metro gives m2 as number)
   let type = departure.category.replace(/\d/g, "");
   let number = departure.number.replace(/\D/g, "");
   
@@ -251,17 +264,21 @@ async function sendNextDeparture(station) {
   	type = equivalents[type];
   }
   
-  if (traintypes.includes(type)) {
+  if (traintypes.includes(type + number)) { // S1, S2, S21
+    flap.traintype = type + number;
+  }
+  
+  else if (traintypes.includes(type)) {
   	flap.traintype = type;
   	flap.trainnum = number;
   }
-  else {
-  	if ((type + number).length <= 5) {
-  	  flap.trainnum = type + number;
-  	}
-  	else if (type.length <= 5) {
-  	  flap.trainnum = type;
-  	}
+  
+  else if ((type + number).length <= 5) {
+  	flap.trainnum = type + number;
+  }
+  
+  else if (type.length <= 5) {
+    flap.trainnum = type;
   }
 
   if (departure.stop.delay) {
@@ -281,7 +298,12 @@ async function sendNextDeparture(station) {
   let stops = [];
   for (let i = 0; i < departure.passList.length; i++) {
     let name = departure.passList[i].location.name;
-    if (name) {
+    
+    if (
+      name &&
+      name != "Bahn-2000-Strecke" &&
+      !name.toLowerCase().includes("tunnel")
+    ) {
       stops.push(name);
     }
   }
@@ -296,14 +318,22 @@ async function sendNextDeparture(station) {
 
 async function autoDeparture(station) {
   let depTime = await sendNextDeparture(station);
-  autofetchTimeout = setTimeout(clearThenDeparture, ((depTime.valueOf() - Date.now()) + 60000))
+  if (depTime) {
+    autoDepartureTimeout = setTimeout(
+      clearThenDeparture,
+      (depTime.valueOf() - Date.now()) + 60000
+    )
+  }
 }
 
 function clearThenDeparture() {
   let station = document.getElementById("station").value;
   send(new Array(62).fill(0));
   
-  autofetchTimeout = setTimeout(function() {autoDeparture(station);}, 20000);
+  autoDepartureTimeout = setTimeout(
+    function() {autoDeparture(station);},
+    20000
+  );
 }
   </script>
 </body>
