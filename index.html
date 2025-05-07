@@ -5,6 +5,8 @@
   </head>
   <body>
     <button onclick="connect()">connect</button>
+    <hr>
+    <p>manual selection</p>
     <form name="data" action="" onsubmit="return sendForm()">
       <input type="checkbox" id="arr" name="arr" value="arr">
       <label for="arr"> is arrival | </label>
@@ -20,6 +22,11 @@
       <br>
       <input type="submit" value="send">
     </form>
+    <hr>
+    <p>fetch from train station</p>
+    Name: <input id="station">
+    <button onclick="clearThenDeparture()">start</button>
+    <button onclick="clearTimeout(autofetchTimeout)">stop</button>
   </body>
 </html>
 
@@ -51,6 +58,7 @@ for (let i = 0; i < infos.length; i++) {
 }
 
 let flap_positions = null;
+let autofetchTimeout = null;
 
 function convText(text, charset, targetLength) {
 	let t = text.toUpperCase();
@@ -161,12 +169,12 @@ function sendForm() {
 	return false;
 }
 
-// auxillary functions for sendNextDeparture (selection of two en-route stops). bit of a mess but don't wanna write it myself. also if there is only one currently it's written to text a, while text d would be preferable (bigger characters)
 function hasFrenchAccents(str) {
   // Common French accented characters
   return /[àâäæçéèêëîïôœùûüÿ]/i.test(str);
 }
 
+// if there is only one currently it's returned as first, as third would be preferable
 function pickThreeStrings(strings, maxLengths) {
   const [maxLenFirst, maxLenSecond, maxLenThird] = maxLengths;
   const n = strings.length;
@@ -284,6 +292,18 @@ async function sendNextDeparture(station) {
   send(flap.getSequence());
     
   return time; // for refresh once departed
+}
+
+async function autoDeparture(station) {
+  let depTime = await sendNextDeparture(station);
+  autofetchTimeout = setTimeout(clearThenDeparture, ((depTime.valueOf() - Date.now()) + 60000))
+}
+
+function clearThenDeparture() {
+  let station = document.getElementById("station").value;
+  send(new Array(62).fill(0));
+  
+  autofetchTimeout = setTimeout(function() {autoDeparture(station);}, 20000);
 }
   </script>
 </body>
