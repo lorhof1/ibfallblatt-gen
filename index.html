@@ -239,7 +239,7 @@ async function sendNextDeparture(station) {
   let time = new Date(departure.stop.departure);
   
   // do not display departed/departing train
-  if (time.getMinutes() <= new Date().getMinutes()) {
+  if (time.valueOf() >= (Date.now() + 60000)) {
     clearThenDeparture();
     return;
   }
